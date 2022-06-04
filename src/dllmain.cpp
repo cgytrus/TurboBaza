@@ -1,8 +1,6 @@
 #include "includes.h"
 #include <libbase64.h>
 
-#define _DEBUG
-
 #ifdef _DEBUG
 #define MEASURE_TIME
 #define TEST_MATCH_VANILLA
@@ -21,7 +19,7 @@ size_t __cdecl base64Decode_H(char* in, size_t inLength, char** out, bool url) {
     auto vanillaResult = base64Decode(in, inLength, &vanillaOut, url);
 
     auto end = std::chrono::system_clock::now();
-    std::cout << "vanilla " << inLength << " decode took " << (end - start).count() / 10000.f << "ms" << std::endl;
+    std::cout << "vanilla " << inLength << " decode took " << (float)(end - start).count() / 10000.f << "ms" << std::endl;
     auto vanillaTime = (end - start).count();
 
     start = std::chrono::system_clock::now();
@@ -45,7 +43,7 @@ size_t __cdecl base64Decode_H(char* in, size_t inLength, char** out, bool url) {
 #ifdef MEASURE_TIME
 
     end = std::chrono::system_clock::now();
-    std::cout << "new " << inLength << " decode took " << (end - start).count() / 10000.f << "ms" << std::endl;
+    std::cout << "new " << inLength << " decode took " << (float)(end - start).count() / 10000.f << "ms" << std::endl;
     auto newTime = (end - start).count();
     if(newTime < vanillaTime)
         std::cout << "                                        less!!" << std::endl;
@@ -54,7 +52,7 @@ size_t __cdecl base64Decode_H(char* in, size_t inLength, char** out, bool url) {
 #ifdef TEST_MATCH_VANILLA
 
     bool lengthsMatch = vanillaResult == result;
-    bool outputMatches = out != nullptr && *out != nullptr && vanillaOut != nullptr;
+    bool outputMatches = *out != nullptr && vanillaOut != nullptr;
     if(outputMatches) {
         for(size_t i = 0; i < min(vanillaResult, result); ++i) {
             if((*out)[i] == vanillaOut[i])
@@ -89,7 +87,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
     auto vanillaResult = base64Encode(in, inLength, &vanillaOut, url);
 
     auto end = std::chrono::system_clock::now();
-    std::cout << "vanilla " << inLength << " encode took " << (end - start).count() / 10000.f << "ms" << std::endl;
+    std::cout << "vanilla " << inLength << " encode took " << (float)(end - start).count() / 10000.f << "ms" << std::endl;
     auto vanillaTime = (end - start).count();
 
     start = std::chrono::system_clock::now();
@@ -114,7 +112,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
 #ifdef MEASURE_TIME
 
     end = std::chrono::system_clock::now();
-    std::cout << "new " << inLength << " encode took " << (end - start).count() / 10000.f << "ms" << std::endl;
+    std::cout << "new " << inLength << " encode took " << (float)(end - start).count() / 10000.f << "ms" << std::endl;
     auto newTime = (end - start).count();
     if(newTime < vanillaTime)
         std::cout << "                                        less!!" << std::endl;
@@ -123,7 +121,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
 #ifdef TEST_MATCH_VANILLA
 
     bool lengthsMatch = vanillaResult == outLength;
-    bool outputMatches = out != nullptr && *out != nullptr && vanillaOut != nullptr;
+    bool outputMatches = *out != nullptr && vanillaOut != nullptr;
     if(outputMatches) {
         for(size_t i = 0; i < min(vanillaResult, result); ++i) {
             if((*out)[i] == vanillaOut[i])
@@ -139,7 +137,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
         if(!outputMatches)
             std::cout << "outputs don't match" << std::endl;
         if(vanillaOut) std::cout << "  vanilla: " << vanillaOut << std::endl;
-        if(out && *out) std::cout << "  new: " << *out << std::endl;
+        if(*out) std::cout << "  new: " << *out << std::endl;
         std::cout << std::endl;
     }
 
@@ -180,14 +178,14 @@ DWORD WINAPI mainThread(void* hModule) {
     conin.close();
     FreeConsole();
     FreeLibraryAndExitThread((HMODULE)hModule, 0);
-#endif
-
+#else
     return 0;
+#endif
 }
 
 BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
     if(reason == DLL_PROCESS_ATTACH) {
-        CreateThread(0, 0x100, mainThread, handle, 0, 0);
+        CreateThread(nullptr, 0x100, mainThread, handle, 0, nullptr);
     }
     return TRUE;
 }
