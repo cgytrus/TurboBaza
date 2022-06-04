@@ -2,10 +2,11 @@
 #include <libbase64.h>
 
 #define _DEBUG
-#define MEASURE_TIME
-#define TEST_MATCH_VANILLA
 
 #ifdef _DEBUG
+#define MEASURE_TIME
+#define TEST_MATCH_VANILLA
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #endif
@@ -162,10 +163,10 @@ DWORD WINAPI mainThread(void* hModule) {
 
     auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
 
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9cd0), base64Decode_H,
+    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9cd0), reinterpret_cast<void*>(base64Decode_H),
         reinterpret_cast<void**>(&base64Decode));
 
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9d70), base64Encode_H,
+    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9d70), reinterpret_cast<void*>(base64Encode_H),
         reinterpret_cast<void**>(&base64Encode));
 
     MH_EnableHook(MH_ALL_HOOKS);
