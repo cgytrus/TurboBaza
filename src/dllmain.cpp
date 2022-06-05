@@ -1,14 +1,18 @@
-#include "includes.h"
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <MinHook.h>
+#include <cstdlib>
 #include <libbase64.h>
 
-#define _DEBUG
+#define DEBUG
 
-#ifdef _DEBUG
+#ifdef DEBUG
 #define MEASURE_TIME
 #define TEST_MATCH_VANILLA
-#include <chrono>
+
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #endif
 
 size_t (__cdecl* base64Decode)(char*, size_t, char**, bool);
@@ -151,7 +155,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
 }
 
 DWORD WINAPI mainThread(void* hModule) {
-#ifdef _DEBUG
+#ifdef DEBUG
     AllocConsole();
     std::ofstream conout("CONOUT$", std::ios::out);
     std::ifstream conin("CONIN$", std::ios::in);
@@ -171,7 +175,7 @@ DWORD WINAPI mainThread(void* hModule) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-#ifdef _DEBUG
+#ifdef DEBUG
     std::string input;
     std::getline(std::cin, input);
 
