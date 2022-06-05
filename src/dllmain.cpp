@@ -1,13 +1,18 @@
-#include "includes.h"
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <MinHook.h>
+#include <cstdlib>
 #include <libbase64.h>
 
-#define _DEBUG
+#define DEBUG
+
+#ifdef DEBUG
 #define MEASURE_TIME
 #define TEST_MATCH_VANILLA
 
-#ifdef _DEBUG
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #endif
 
 size_t (__cdecl* base64Decode)(char*, size_t, char**, bool);
@@ -150,7 +155,7 @@ size_t __cdecl base64Encode_H(char* in, size_t inLength, char** out, bool url) {
 }
 
 DWORD WINAPI mainThread(void* hModule) {
-#ifdef _DEBUG
+#ifdef DEBUG
     AllocConsole();
     std::ofstream conout("CONOUT$", std::ios::out);
     std::ifstream conin("CONIN$", std::ios::in);
@@ -162,15 +167,15 @@ DWORD WINAPI mainThread(void* hModule) {
 
     auto cocos2dBase = reinterpret_cast<uintptr_t>(GetModuleHandle("libcocos2d.dll"));
 
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9cd0), base64Decode_H,
+    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9cd0), reinterpret_cast<void*>(base64Decode_H),
         reinterpret_cast<void**>(&base64Decode));
 
-    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9d70), base64Encode_H,
+    MH_CreateHook(reinterpret_cast<void*>(cocos2dBase + 0xd9d70), reinterpret_cast<void*>(base64Encode_H),
         reinterpret_cast<void**>(&base64Encode));
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-#ifdef _DEBUG
+#ifdef DEBUG
     std::string input;
     std::getline(std::cin, input);
 
